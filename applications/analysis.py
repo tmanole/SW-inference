@@ -116,8 +116,8 @@ for i in range(1, n_proc):
 print(final_cs)
 
 if not misspecified:
-    np.save("well_specified_inds_n" + str(n) + "_m" + str(n_sim) + + "_time" + str(time.time() - start_time) ".npy", np.array(final_cs))
+    np.save("well_specified_inds_n" + str(n) + "_m" + str(n_sim) + + "_time" + str(time.time() - start_time) + ".npy", np.array(final_cs))
 
 else:
-    np.save("misspecified_inds_n" + str(n) + "_m" + str(n_sim) + + "_time" + str(time.time() - start_time) ".npy", np.array(final_cs))
+    np.save("misspecified_inds_n" + str(n) + "_m" + str(n_sim) + + "_time" + str(time.time() - start_time) + ".npy", np.array(final_cs))
 
