@@ -67,7 +67,6 @@ def process_chunk(ran, n, truth):
     elapsed  = np.full((high-low), -1.0)
 
     for rep in range(low, high):
-        np.random.seed(rep)
         print(rep)
         start_time = time.time()
 
@@ -78,18 +77,24 @@ def process_chunk(ran, n, truth):
 #        else:
 #            theta = None
 #
+        np.random.seed(rep)
         x = generate_x(n)
+
+        np.random.seed(rep)
         y = generate_y(n)
 
         if d == 1:
 
             if method == "exact":
+                np.random.seed(rep)
                 C = ci.exact_1d(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", nq=nq)
 
             elif method == "pretest":
+                np.random.seed(rep)
                 C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", B=B, nq=nq)
 
             elif method == "boot":
+                np.random.seed(rep)
                 C = ci.bootstrap_1d(x, y, r=r, delta=delta, alpha=alpha, B=B, nq=nq)
 
             else:
@@ -97,12 +102,15 @@ def process_chunk(ran, n, truth):
 
         else:
             if method == "exact":
+                np.random.seed(rep)
                 C = ci.mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=None)
 
             elif method == "pretest":
+                np.random.seed(rep)
                 C = ci.pretest_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
 
             elif method == "boot":
+                np.random.seed(rep)
                 C = ci.bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
 
             else:
@@ -111,13 +119,12 @@ def process_chunk(ran, n, truth):
         coverage[rep-low] = C[0] <= truth and C[1] >= truth
         lengths [rep-low] = C[1] - C[0]
 
-        print("Repetition ", rep, ", Covered: ", C[0] <= truth and C[1] >= truth, ";  Interval is: ", C)
+        if rep % 20 == 0:
+            print("Repetition ", rep, ", Covered: ", C[0] <= truth and C[1] >= truth, ";  Interval is: ", C)
 
         elapsed[rep-low] = time.time() - start_time
 
     return coverage, lengths, elapsed
-
-
 
 
 #def do_sim(generate_x, generate_y, d, method, path=None, truth=None, sim=1, r=2, N=500, B=500, nq=500, ns=[300, 600, 900, 1200, 1500], delta=0.1, alpha=0.05, reps=200, n_proc=8, fix=False):
@@ -131,9 +138,11 @@ x = generate_x(50000)
 y = generate_y(50000) 
 
 if d==1:
+    np.random.seed(0)
     truth = distances.w(x, y, r=r, nq=10000, delta=delta)
 
 else:
+    np.random.seed(0)
     truth = distances.sw(x, y, r=r, N=10000, nq=10000, delta=delta) 
 
 print("Truth: ", truth, "\n")
