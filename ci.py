@@ -88,7 +88,7 @@ def exact_1d(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", nq=1000):
     return lower_final, upper_final
 
 
-def bootstrap_1d(x, y, r=2, delta=0.1, alpha=0.05, B=500, nq=1000):
+def bootstrap_1d(x, y, r=2, delta=0.1, alpha=0.05, B=1000, nq=1000):
     """ Bootstrap confidence intervals for W_{r,delta}(P, Q) in one dimension.
     
         Parameters
@@ -146,7 +146,7 @@ def bootstrap_1d(x, y, r=2, delta=0.1, alpha=0.05, B=500, nq=1000):
 """ Sliced Wasserstein distance confidence intervals. """
 
 
-def mc_sw(x, y, r=2, delta=0.1, alpha=0.05, N=100, nq=1000, theta=None):
+def mc_sw(x, y, r=2, delta=0.1, alpha=0.05, N=500, nq=500, theta=None):
     """ Monte Carlo confidence interval for SW_{r,delta}(P, Q).
     
         Parameters
@@ -206,7 +206,7 @@ def mc_sw(x, y, r=2, delta=0.1, alpha=0.05, N=100, nq=1000, theta=None):
 
     return left, right
 
-def bootstrap_sw(x, y, r=2, delta=0.1, alpha=0.05, B=500, N=100, nq=1000, N_fit=2000, theta=None):
+def bootstrap_sw(x, y, r=2, delta=0.1, alpha=0.05, B=1000, N=500, nq=500, N_fit=2000, theta=None):
     """ Bootstrap confidence interval for SW_{r,delta}(P, Q).
     
         Parameters
