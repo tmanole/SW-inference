@@ -19,7 +19,7 @@ def generate_x_model1(n):
 
     return x
 
-def generate_y_model2(n):
+def generate_y_model1(n):
     d=2
     return np.random.normal(size=n*d).reshape([n,d])
 
