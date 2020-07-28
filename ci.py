@@ -86,3 +86,189 @@ def exact_1d(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", nq=1000):
     upper_final = np.power( (1/(1-2*delta)) * np.mean(up ),  1/r)
 
     return lower_final, upper_final
+
+
+def bootstrap_1d(x, y, r=2, delta=0.1, alpha=0.05, B=500, nq=1000):
+    """ Bootstrap confidence intervals for W_{r,delta}(P, Q) in one dimension.
+    
+        Parameters
+        ----------
+        x : np.ndarray (n,) 
+            sample from P
+        y : np.ndarray (m,)
+            sample from Q
+        r : int, optional
+            order of the Wasserstein distance
+        delta : float, optional
+            trimming constant, between 0 and 0.5.
+        alpha : float, optional
+            number between 0 and 1, such that 1-alpha is the level of the confidence interval
+        B : int, optional
+            number of bootstrap replications
+        nq : int, optional
+            number of quantiles to use in Monte Carlo integral approximations
+
+        Returns
+        -------
+        l : float
+            lower confidence limit
+
+        u : float
+            upper confidence limit
+    """
+    n = x.shape[0]
+    m = y.shape[0]
+
+    W = []
+    What = np.power(dist.w(x, y, r=r, delta=delta, nq=nq), r)
+
+    for b in range(B):
+        I  = np.random.choice(n, n)
+        xx = x[I]
+        I  = np.random.choice(m, m)
+        yy = y[I]
+
+        W.append(np.power(dist.w(xx, yy, r=r, delta=delta, nq=nq), r) - What)
+
+    q1 = np.quantile(W, alpha/2)
+    q2 = np.quantile(W, 1-alpha/2)
+
+    Wlower = np.max([What - q2,0])
+    Wupper = What - q1
+
+    if Wupper < 0:
+        return 0, 0
+
+    return np.power(Wlower, 1/r), np.power(Wupper, 1/r)
+
+
+
+""" Sliced Wasserstein distance confidence intervals. """
+
+
+def mc_sw(x, y, r=2, delta=0.1, alpha=0.05, N=100, nq=1000, theta=None):
+    """ Monte Carlo confidence interval for SW_{r,delta}(P, Q).
+    
+        Parameters
+        ----------
+        x : np.ndarray (n,d) 
+            sample from P
+        y : np.ndarray (m,d)
+            sample from Q
+        r : int, optional
+            order of the Wasserstein distance
+        delta : float, optional
+            trimming constant, between 0 and 0.5.
+        alpha : float, optional
+            number between 0 and 1, such that 1-alpha is the level of the confidence interval
+        N : int, optional
+            number of Monte Carlo draws from the unit sphere
+        nq : int, optional
+            number of quantiles to use in Monte Carlo integral approximations
+        theta: np.ndarray (N, d), optional
+            sample from the unit sphere to be used, if specified
+
+        Returns
+        -------
+        l : float
+            lower confidence limit
+
+        u : float
+            upper confidence limit
+    """
+    SW = 0
+
+    n = x.shape[0]
+    m = y.shape[0]
+    d = x.shape[1]
+
+    ws = []
+    low = []
+    up = []
+    if theta is None:
+        theta = np.random.multivariate_normal(np.repeat(0, d), np.identity(d), size=N)
+        theta = np.apply_along_axis(lambda x: x/np.linalg.norm(x), 1, theta)
+
+    for i in range(N):
+        thetas_x = np.broadcast_to(theta[i,:], [n, d])
+        thetas_y = np.broadcast_to(theta[i,:], [m, d])
+
+        x_proj = np.einsum('ij, ij->i', x, thetas_x)
+        y_proj = np.einsum('ij, ij->i', y, thetas_y)
+
+        l, u = exact_1d(x_proj, y_proj, r=r, delta=delta, alpha=alpha/N, nq=nq)
+
+        low.append(np.power(l,r))
+        up.append(np.power(u,r))
+
+    left  = np.power(np.mean(low), 1/r)
+    right = np.power(np.mean(up), 1/r)
+
+    return left, right
+
+def bootstrap_sw(x, y, r=2, delta=0.1, alpha=0.05, B=500, N=100, nq=1000, N_fit=2000, theta=None):
+    """ Bootstrap confidence interval for SW_{r,delta}(P, Q).
+    
+        Parameters
+        ----------
+        x : np.ndarray (n,d) 
+            sample from P
+        y : np.ndarray (m,d)
+            sample from Q
+        r : int, optional
+            order of the Wasserstein distance
+        delta : float, optional
+            trimming constant, between 0 and 0.5.
+        alpha : float, optional
+            number between 0 and 1, such that 1-alpha is the level of the confidence interval
+        B : int, optional
+            number of bootstrap replications
+        N : int, optional
+            number of Monte Carlo draws from the unit sphere
+        nq : int, optional
+            number of quantiles to use in Monte Carlo integral approximations
+        theta: np.ndarray (N, d), optional
+            sample from the unit sphere to be used, if specified
+
+        Returns
+        -------
+        l : float
+            lower confidence limit
+
+        u : float
+            upper confidence limit
+    """
+    n = x.shape[0]
+    m = y.shape[0]
+    d = x.shape[1]
+
+    resample = False
+    NN=N
+    if theta is None:
+        resample = True
+        NN = N_fit
+
+    boot = []
+    SW_hat = np.power(dist.sw(x, y, r=r, delta=delta, N=NN, nq=nq, theta=theta), r)
+
+    for b in range(B):
+        if resample:
+            theta = np.random.multivariate_normal(np.repeat(0, d), np.identity(d), size=N)
+            theta = np.apply_along_axis(lambda x: x/np.linalg.norm(x), 1, theta)
+
+        x_ind  = np.random.choice(n, n)
+        xx = x[x_ind,:]
+
+        y_ind  = np.random.choice(m, m)
+        yy = y[y_ind,:]
+
+        boot.append(np.power(dist.sw(xx, yy, r=r, delta=delta, N=N, nq=nq, theta=theta), r) - SW_hat)
+
+    q1 = np.quantile(boot, alpha/2)
+    q2 = np.quantile(boot, 1-alpha/2)
+
+    SW_lower = np.max([SW_hat - q2, 0])
+    SW_upper = SW_hat - q1
+
+    return np.power(SW_lower, 1/r), np.power(SW_upper, 1/r)
+
