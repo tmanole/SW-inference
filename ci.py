@@ -272,3 +272,99 @@ def bootstrap_sw(x, y, r=2, delta=0.1, alpha=0.05, B=500, N=100, nq=1000, N_fit=
 
     return np.power(SW_lower, 1/r), np.power(SW_upper, 1/r)
 
+
+def pretest(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", N=500, B=500, nq=1000):
+    """ Pretesting confidence interval, using a combination of a two-sample 
+        and a test for the maximum gap between sample points.
+    
+        Parameters
+        ----------
+        x : np.ndarray (n,) 
+            sample from P
+        y : np.ndarray (m,)
+            sample from Q
+        r : int, optional
+            order of the Wasserstein distance
+        delta : float, optional
+            trimming constant, between 0 and 0.5.
+        alpha : float, optional
+            real number between 0 and 1, such that 1-alpha is the level of the confidence interval
+        mode : str, optional
+            either "DKW" to use a confidence interval based on the Dvoretzky-Kiefer-Wolfowitz (DKW) inequality [1,2]
+            or "rel_VC" to use a confidence interval based on the relative Vapnik-Chervonenkis (VC) inequality [3]
+        N : int, optional
+            number of Monte Carlo replications to use for the unit sphere integral approximation
+        B : int, optional
+            number of bootstrap replications
+        nq : int, optional
+            number of quantiles to use in Monte Carlo integral approximations
+
+        Returns
+        -------
+        l : float
+            lower confidence limit
+
+        u : float
+            upper confidence limit
+
+        References
+        ----------
+
+        .. [1] Dvoretzky, Aryeh, Jack Kiefer, and Jacob Wolfowitz. 
+               "Asymptotic minimax character of the sample distribution function and 
+               of the classical multinomial estimator." The Annals of Mathematical Statistics (1956): 642-669.
+
+        .. [2] Massart, Pascal. "The tight constant in the Dvoretzky-Kiefer-Wolfowitz inequality." The Annals of Probability (1990): 1269-1283.
+
+        .. [3] Vapnik, V., Chervonenkis, A.: On the uniform convergence of relative frequencies of events to
+               their probabilities. Theory of Probability and its Applications 16 (1971) 264–280.
+
+    """
+    n = x.shape[0]
+    m = y.shape[0]
+
+    if x.ndim == 1:
+        C_exact = exact_1d(x, y, r=r, delta=delta, alpha=alpha, mode=mode, nq=nq)
+        arr_x = np.array(x).reshape([-1,1])
+        arr_y = np.array(y).reshape([-1,1])
+
+    else:
+        C_exact = mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq)
+        arr_x = x
+        arr_y = y
+
+    unique_x = np.unique(arr_x, axis=0, return_counts=True)[1]
+    unique_y = np.unique(arr_y, axis=0, return_counts=True)[1]
+
+    if np.any(unique_x != 1) or np.any(unique_y != 1):
+        print("not unique")
+        return C_exact
+
+    if C_exact[0] == 0:
+        print("null")
+        return C_exact
+
+    print("boot")
+    if x.ndim == 1:
+        return bootstrap_1d(x, y, r=r, delta=delta, alpha=alpha, B=B, nq=nq)
+    
+    return bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq)
+
+
+#for i in range(15):
+#    #x = np.random.beta(a=2, b=3, size=400)
+#    #x = np.concatenate([np.repeat(1, 50), np.repeat(2, 330)]) #np.random.uniform(1, 2, size=400)
+#    #y = np.random.uniform(1, 2, size=400)
+#
+#    
+#    x1 = np.concatenate([np.repeat(1, 500), np.repeat(2, 500)]) #np.random.uniform(1, 2, size=400)
+#    x2 = np.concatenate([np.repeat(3, 500), np.repeat(5, 500)])
+#
+#    x = np.random.multivariate_normal([0,0 ], np.identity(2), size=800)#np.vstack([x1,x2]).reshape([1000, 2])
+#
+#    y = np.random.multivariate_normal([0,0], np.identity(2), size=800)
+#
+#
+#    print("Pretest: ", pretest(x, y, B=5))
+
+
