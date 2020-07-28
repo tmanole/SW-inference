@@ -107,7 +107,7 @@ def process_chunk(ran, n, truth):
 
             elif method == "pretest":
                 np.random.seed(rep)
-                C = ci.pretest_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
+                C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
 
             elif method == "boot":
                 np.random.seed(rep)
