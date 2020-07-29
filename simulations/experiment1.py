@@ -15,7 +15,7 @@ from models import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-mod', '--model', default=1, type=int, help='Model number.')
-parser.add_argument('-meth', '--method', default="exact_DKW", type=str, help='Method name.')
+parser.add_argument('-meth', '--method', default="exact", type=str, help='Method name.')
 parser.add_argument('-np','--nproc', default=8, type=int, help='Number of processes to run in parallel.')
 parser.add_argument('-del', '--delta', default=0.1, type=float, help='Trimming constant.')
 parser.add_argument('-a', '--alpha', default=0.1, type=float, help='Trimming constant.')
