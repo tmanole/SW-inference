@@ -18,12 +18,12 @@ parser.add_argument('-mod', '--model', default=1, type=int, help='Model number.'
 parser.add_argument('-meth', '--method', default="exact", type=str, help='Method name.')
 parser.add_argument('-np','--nproc', default=8, type=int, help='Number of processes to run in parallel.')
 parser.add_argument('-del', '--delta', default=0.1, type=float, help='Trimming constant.')
-parser.add_argument('-a', '--alpha', default=0.1, type=float, help='Trimming constant.')
+parser.add_argument('-a', '--alpha', default=0.05, type=float, help='Trimming constant.')
 parser.add_argument('-B', '--B', default=1000, type=int, help='Number of bootstrap replications.')
 parser.add_argument('-r', '--r', default=2, type=int, help='Order of the Wasserstein distance.')
 parser.add_argument('-N', '--N', default=500, type=int, help='Monte Carlo replications over unit sphere.')
 parser.add_argument('-nq', '--nq', default=500, type=int, help='Monte Carlo replications over [delta,1-delta].')
-parser.add_argument('-reps', '--reps', default=200, type=int, help='Number of simulation replications.')
+parser.add_argument('-reps', '--reps', default=100, type=int, help='Number of simulation replications.')
 args = parser.parse_args()
 
 print("Args: ", args)
@@ -67,6 +67,7 @@ def process_chunk(ran, n, truth):
     elapsed  = np.full((high-low), -1.0)
 
     for rep in range(low, high):
+        np.random.seed(rep)
         print(rep)
         start_time = time.time()
 
@@ -77,24 +78,18 @@ def process_chunk(ran, n, truth):
 #        else:
 #            theta = None
 #
-        np.random.seed(rep)
         x = generate_x(n)
-
-        np.random.seed(rep)
         y = generate_y(n)
 
         if d == 1:
 
             if method == "exact":
-                np.random.seed(rep)
                 C = ci.exact_1d(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", nq=nq)
 
             elif method == "pretest":
-                np.random.seed(rep)
                 C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", B=B, nq=nq)
 
             elif method == "boot":
-                np.random.seed(rep)
                 C = ci.bootstrap_1d(x, y, r=r, delta=delta, alpha=alpha, B=B, nq=nq)
 
             else:
@@ -102,15 +97,12 @@ def process_chunk(ran, n, truth):
 
         else:
             if method == "exact":
-                np.random.seed(rep)
                 C = ci.mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=None)
 
             elif method == "pretest":
-                np.random.seed(rep)
                 C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
 
             elif method == "boot":
-                np.random.seed(rep)
                 C = ci.bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
 
             else:
@@ -134,8 +126,8 @@ print("Chose method " + str(method) + " with dimension " + str(d))
 path = "results/model" + str(model) + "/" + method
 pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
-x = generate_x(50000) 
-y = generate_y(50000) 
+x = generate_x(500)#00) 
+y = generate_y(500)#00) 
 
 if d==1:
     np.random.seed(0)
@@ -143,7 +135,7 @@ if d==1:
 
 else:
     np.random.seed(0)
-    truth = distances.sw(x, y, r=r, N=10000, nq=10000, delta=delta) 
+    truth = distances.sw(x, y, r=r, N=100, nq=10000, delta=delta) 
 
 print("Truth: ", truth, "\n")
 
