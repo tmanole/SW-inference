@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-ns', '--nsim', default=10000, type=int, help='Number of simulated points.')
 parser.add_argument('-n', '--n', default=2000, type=int, help='Sample size.')
 parser.add_argument('-np','--nproc', default=8, type=int, help='Number of processes to run in parallel.')
-parser.add_argument('-ms','--misspec', default=False, type=int, help='Misspecified model?')
+parser.add_argument('-ms','--misspec', default=False, type=bool, help='Misspecified model?')
 args = parser.parse_args()
 
 misspecified = args.misspec
@@ -24,8 +24,8 @@ if not misspecified:
     n_sim = args.nsim
     n = args.n
 
-    alpha1_range = np.linspace(18, 26, 15)    
-    alpha2_range = np.linspace(2, 22, 15)     
+    alpha1_range = np.linspace(18, 26, 17)    
+    alpha2_range = np.linspace(2, 22, 21)     
     beta1_range  = np.linspace(4, 4, 1)       
     beta2_range  = np.linspace(4.5, 4.5, 1)   
     mu_range     = np.linspace(250, 400, 101) 
@@ -36,8 +36,8 @@ else:
     n_sim = 10000
     n = 2000
 
-    alpha1_range = np.linspace(19, 28, 15)    
-    alpha2_range = np.linspace(15, 30, 15)    
+    alpha1_range = np.linspace(18, 28, 15)    
+    alpha2_range = np.linspace(14, 26, 15)    
     beta1_range  = np.linspace(2, 4, 1)       
     beta2_range  = np.linspace(2, 4.5, 1)     
     mu_range     = np.linspace(250, 400, 101) 
@@ -116,8 +116,8 @@ for i in range(1, n_proc):
 print(final_cs)
 
 if not misspecified:
-    np.save("well_specified_inds_n" + str(n) + "_m" + str(n_sim) + + "_time" + str(time.time() - start_time) + ".npy", np.array(final_cs))
+    np.save("well_specified_inds_n" + str(n) + "_m" + str(n_sim)  + "_time" + str(round(time.time() - start_time, 6)) + ".npy", np.array(final_cs))
 
 else:
-    np.save("misspecified_inds_n" + str(n) + "_m" + str(n_sim) + + "_time" + str(time.time() - start_time) + ".npy", np.array(final_cs))
+    np.save("misspecified_inds_n" + str(n) + "_m" + str(n_sim) +  "_time" + str(round(time.time() - start_time, 6)) + ".npy", np.array(final_cs))
 
