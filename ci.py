@@ -273,7 +273,7 @@ def bootstrap_sw(x, y, r=2, delta=0.1, alpha=0.05, B=1000, N=500, nq=500, N_fit=
     return np.power(SW_lower, 1/r), np.power(SW_upper, 1/r)
 
 
-def pretest(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", N=500, B=500, nq=1000):
+def pretest(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", N=500, B=500, nq=1000, theta = None):
     """ Pretesting confidence interval, using a combination of a two-sample 
         and a test for the maximum gap between sample points.
     
@@ -329,7 +329,7 @@ def pretest(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", N=500, B=500, nq=1000)
         arr_y = np.array(y).reshape([-1,1])
 
     else:
-        C_exact = mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq)
+        C_exact = mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=theta)
         arr_x = x
         arr_y = y
 
@@ -348,7 +348,7 @@ def pretest(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", N=500, B=500, nq=1000)
     if x.ndim == 1:
         return bootstrap_1d(x, y, r=r, delta=delta, alpha=alpha, B=B, nq=nq)
     
-    return bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq)
+    return bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=theta)
 
 
 #for i in range(15):
