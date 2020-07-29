@@ -14,7 +14,8 @@ import distances
 from models import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-mod', '--model', default=1, type=int, help='Model number.')
+parser.add_argument('-asymp', '--asymp', default=1, type=int, help='Asymptotic experiment index.')
+parser.add_argument('-J', '--finiteJ', default=False, type=bool, help='Is J(P) finite?')
 parser.add_argument('-np','--nproc', default=8, type=int, help='Number of processes to run in parallel.')
 parser.add_argument('-del', '--delta', default=0.1, type=float, help='Trimming constant.')
 parser.add_argument('-eps', '--epsilon', default=0.1, type=float, help='Away-from-null parameter.')
@@ -26,6 +27,8 @@ args = parser.parse_args()
 
 print("Args: ", args)
 
+asymp = args.asymp
+finiteJ = args.finiteJ
 n_proc = args.nproc
 r = args.r
 nq = args.nq
@@ -34,26 +37,70 @@ epsilon = args.epsilon
 alpha = args.alpha
 reps = args.reps
 
+
+spec = "infiniteJ"
+if finiteJ:
+    spec = "finiteJ"
+
+if asymp == 1:
+    r = 2
+    path = "results/asymp1/" + spec + "/epsilon_" + str(epsilon) 
+
+elif asymp == 2:
+    epsilon = 0
+    path = "results/asymp2/" + spec + "/r_" + str(r) 
+
+else:
+    sys.exit("Experiment index not recognized.")
+
 ns = [250, 500, 750, 1000, 2000, 5000, 10000, 25000, 50000]
 
+if finiteJ:
+    def generate_x(n):
+        return np.random.uniform(-5, 5, n)
+    
+    def generate_y(n):
+        x = np.empty([n, 1])
+    
+        for i in range(n):
+            u = np.random.uniform(size=1)
+    
+            if u < 0.5 + epsilon:
+                x[i] = np.random.uniform(-5, 0, size=1)
+    
+            else:
+                x[i] = np.random.uniform(0, 5, size=1)
+    
+        return x
 
+else:
+    def generate_x(n):
+        x = np.empty(n)
 
-def generate_x(n):
-    return np.random.uniform(-5, 5, n)
+        for i in range(n):
+            u = np.random.uniform(0, 1, 1)
 
-def generate_y(n):
-    x = np.empty([n, 1])
+            if u < 0.5:
+                x[i] = -5
 
-    for i in range(n):
-        u = np.random.uniform(size=1)
+            else:
+                x[i] = 5
 
-        if u < 0.5 + epsilon:
-            x[i] = np.random.uniform(-5, 0, size=1)
+        return x
 
-        else:
-            x[i] = np.random.uniform(0, 5, size=1)
+    def generate_y(n):
+        y = np.empty(n)
 
-    return x
+        for i in range(n):
+            u = np.random.uniform(0, 1, 1)
+
+            if u < 0.5+epsilon:
+                y[i] = -5
+
+            else:
+                y[i] = 5
+
+        return y
 
 
 def process_chunk(ran, n, truth):
@@ -67,7 +114,6 @@ def process_chunk(ran, n, truth):
     elapsed  = np.full((high-low), -1.0)
 
     for rep in range(low, high):
-        print(rep)
         start_time = time.time()
 
         np.random.seed(rep)
@@ -82,7 +128,7 @@ def process_chunk(ran, n, truth):
         coverage[rep-low] = C[0] <= truth and C[1] >= truth
         lengths [rep-low] = C[1] - C[0]
 
-        if rep % 20 == 0:
+        if rep % 30 == 0:
             print("Repetition ", rep, ", Covered: ", C[0] <= truth and C[1] >= truth, ";  Interval is: ", C)
 
         elapsed[rep-low] = time.time() - start_time
@@ -91,8 +137,7 @@ def process_chunk(ran, n, truth):
 
 
 print("----------------------------------Starting-------------------------------------")
-
-path = "results/experiment2/epsilon_" + str(epsilon) 
+print("asymp:", asymp, ", r:", r, ", epsilon:", epsilon, ", finiteJ:", finiteJ)
 pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 x = generate_x(500000) 
