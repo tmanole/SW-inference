@@ -91,7 +91,7 @@ for n_sim in n_sims:
 plt.plot([22], [12], "o", c="red")#, label="$\\theta_0$")
 
 
-plt.legend(loc="lower left", title="m")#, ncol=4)
+plt.legend(loc="lower left", title="$m$")#, ncol=4)
 plt.grid(True, alpha=grid_alpha)
 plt.xlim([19.5, 24])
 plt.ylim([5, 22])
