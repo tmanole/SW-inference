@@ -1,3 +1,14 @@
+###################################################################################
+## The following function was adapted from the codebase associated with the paper
+##
+## Bernton, E., Jacob, P. E., Gerber, M., & Robert, C. P. (2019). Approximate 
+## Bayesian computation with the Wasserstein distance. Journal of the Royal 
+## Statistical Society: Series B (Statistical Methodology), 81(2)
+##
+## and can be found at: 
+## https://github.com/pierrejacob/winference/blob/master/R/model_get_toggleswitch.R
+###################################################################################
+
 import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt
