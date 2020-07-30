@@ -18,7 +18,7 @@ matplotlib.rcParams['mathtext.fontset'] = 'stix'
 matplotlib.rcParams['font.family'] = 'STIXGeneral'
 
 lw = 2            # Line width
-groid_alpha = 0.3 # Grid transparency
+grid_alpha = 0.3 # Grid transparency
 
 n_sim = 20000
 
@@ -47,13 +47,13 @@ for n_sim in n_sims:
     theta_grid = np.array(temp).T.reshape(-1, 7)
 
     if n_i == 0:
-        mats = np.load("well_specified_inds_n2000_m5000_time28277.654217.npy")
+        mats = np.load("results/well_specified_inds_n2000_m5000_time28277.654217.npy")
 
     elif n_i == 1:
-        mats = np.load("well_specified_inds_n2000_m20000_time105523.319089.npy")    
+        mats = np.load("results/well_specified_inds_n2000_m20000_time105523.319089.npy")    
 
     else:
-        mats = np.load("well_specified_inds_n2000_m10000_time54734.667304.npy")
+        mats = np.load("results/well_specified_inds_n2000_m10000_time54734.667304.npy")
 
     wh = mats[:,1] == 0
 
@@ -99,5 +99,5 @@ plt.xlabel(r"$\alpha_1$")
 plt.ylabel(r"$\alpha_2$")
 
     
-plt.savefig("well_specified.pdf")
+plt.savefig("results/well_specified.pdf")
     

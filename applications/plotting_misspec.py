@@ -37,7 +37,7 @@ temp = np.meshgrid(alpha1_range, alpha2_range, beta1_range, beta2_range, mu_rang
 
 theta_grid = np.array(temp).T.reshape(-1, 7)
 
-inds = np.load("misspecified_inds_n2000_m10000_time33887.491714.npy")
+inds = np.load("results/misspecified_inds_n2000_m10000_time33887.491714.npy")
 
 inds_keep = []
 
@@ -82,5 +82,5 @@ plt.xlabel(r"$\alpha_1$")
 plt.ylabel(r"$\alpha_2$")
 
     
-plt.savefig("misspecified.pdf")
+plt.savefig("results/misspecified.pdf")
     
