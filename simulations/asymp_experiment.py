@@ -19,10 +19,10 @@ parser.add_argument('-J', '--finiteJ', default=False, type=bool, help='Is J(P) f
 parser.add_argument('-np','--nproc', default=8, type=int, help='Number of processes to run in parallel.')
 parser.add_argument('-del', '--delta', default=0.1, type=float, help='Trimming constant.')
 parser.add_argument('-eps', '--epsilon', default=0.1, type=float, help='Away-from-null parameter.')
-parser.add_argument('-a', '--alpha', default=0.1, type=float, help='Trimming constant.')
+parser.add_argument('-a', '--alpha', default=0.05, type=float, help='Trimming constant.')
 parser.add_argument('-r', '--r', default=2, type=int, help='Order of the Wasserstein distance.')
-parser.add_argument('-nq', '--nq', default=2500, type=int, help='Monte Carlo replications over [delta,1-delta].')
-parser.add_argument('-reps', '--reps', default=200, type=int, help='Number of simulation replications.')
+parser.add_argument('-nq', '--nq', default=10000, type=int, help='Monte Carlo replications over [delta,1-delta].')
+parser.add_argument('-reps', '--reps', default=100, type=int, help='Number of simulation replications.')
 args = parser.parse_args()
 
 print("Args: ", args)
@@ -60,7 +60,7 @@ if finiteJ:
         return np.random.uniform(-5, 5, n)
     
     def generate_y(n):
-        x = np.empty([n, 1])
+        x = np.empty([n])
     
         for i in range(n):
             u = np.random.uniform(size=1)
@@ -128,8 +128,8 @@ def process_chunk(ran, n, truth):
         coverage[rep-low] = C[0] <= truth and C[1] >= truth
         lengths [rep-low] = C[1] - C[0]
 
-        if rep % 30 == 0:
-            print("Repetition ", rep, ", Covered: ", C[0] <= truth and C[1] >= truth, ";  Interval is: ", C)
+        #if rep % 30 == 0:
+        print("Repetition ", rep, ", Covered: ", C[0] <= truth and C[1] >= truth, ";  Interval is: ", C)
 
         elapsed[rep-low] = time.time() - start_time
 
@@ -140,11 +140,15 @@ print("----------------------------------Starting-------------------------------
 print("asymp:", asymp, ", r:", r, ", epsilon:", epsilon, ", finiteJ:", finiteJ)
 pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
-x = generate_x(500000) 
-y = generate_y(500000) 
+if epsilon != 0:
+    x = generate_x(500000) 
+    y = generate_y(500000) 
+    
+    np.random.seed(0)
+    truth = distances.w(x, y, r=r, nq=10000, delta=delta)
 
-np.random.seed(0)
-truth = distances.w(x, y, r=r, nq=10000, delta=delta)
+else:
+    truth = 0
 
 print("Truth: ", truth, "\n")
 

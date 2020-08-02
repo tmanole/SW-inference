@@ -56,9 +56,19 @@ else:
 
 ns = [600, 900, 1200, 1500]
 
-def process_chunk(ran, n, truth):
+if method == "pretest":
+    boot_coverage = np.load("results/model" + str(model) + "/boot/coverage.npy")
+    boot_length   = np.load("results/model" + str(model) + "/boot/lengths.npy")
+    boot_elapsed  = np.load("results/model" + str(model) + "/boot/elapsed.npy")
+
+    print(np.sum(boot_coverage, axis=0))
+
+def process_chunk(ran, ni, truth):
     """ Helper function for running a given range of simulations, for a given method and sample size,
         in parallel. """
+
+    n = ns[ni]
+
     low = ran[0]
     high = ran[1]
 
@@ -87,7 +97,29 @@ def process_chunk(ran, n, truth):
                 C = ci.exact_1d(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", nq=nq)
 
             elif method == "pretest":
-                C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", B=B, nq=nq)
+                #C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", B=B, nq=nq)
+
+                C_exact = ci.exact_1d(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", nq=nq)
+                arr_x = np.array(x).reshape([-1,1])
+                arr_y = np.array(y).reshape([-1,1])
+            
+                unique_x = np.unique(arr_x, axis=0, return_counts=True)[1]
+                unique_y = np.unique(arr_y, axis=0, return_counts=True)[1]
+            
+                if np.any(unique_x != 1) or np.any(unique_y != 1):
+                    print("not unique")
+                    C = C_exact
+            
+                elif C_exact[0] == 0:
+                    print("null")
+                    C = C_exact
+            
+                else:
+                    coverage[rep-low] = boot_coverage[rep, ni]
+                    lengths [rep-low] = boot_length  [rep, ni]
+                    elapsed [rep-low] = boot_elapsed [rep, ni]
+
+                    continue	
 
             elif method == "boot":
                 C = ci.bootstrap_1d(x, y, r=r, delta=delta, alpha=alpha, B=B, nq=nq)
@@ -100,7 +132,26 @@ def process_chunk(ran, n, truth):
                 C = ci.mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=None)
 
             elif method == "pretest":
-                C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
+                C_exact = ci.mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=None)
+            
+                unique_x = np.unique(x, axis=0, return_counts=True)[1]
+                unique_y = np.unique(y, axis=0, return_counts=True)[1]
+            
+                if np.any(unique_x != 1) or np.any(unique_y != 1):
+                    print("not unique")
+                    C = C_exact
+            
+                elif C_exact[0] == 0:
+                    print("null")
+                    C = C_exact
+            
+                else:
+#                    print("bootstrap: ",  boot_coverage[rep-low, ni])
+                    coverage[rep-low] = boot_coverage[rep, ni]
+                    lengths [rep-low] = boot_length [rep, ni]
+                    elapsed [rep-low] = boot_elapsed [rep, ni]
+
+                    continue	
 
             elif method == "boot":
                 C = ci.bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
@@ -111,8 +162,8 @@ def process_chunk(ran, n, truth):
         coverage[rep-low] = C[0] <= truth and C[1] >= truth
         lengths [rep-low] = C[1] - C[0]
 
-        if rep % 20 == 0:
-            print("Repetition ", rep, ", Covered: ", C[0] <= truth and C[1] >= truth, ";  Interval is: ", C)
+#        if rep % 0 == 0:
+        print("Method ", method, " Model ", model, " n=", n, "\\Repetition ", rep, ", Covered: ", C[0] <= truth and C[1] >= truth, ";  Interval is: ", C)
 
         elapsed[rep-low] = time.time() - start_time
 
@@ -126,8 +177,8 @@ print("Chose method " + str(method) + " with dimension " + str(d))
 path = "results/model" + str(model) + "/" + method
 pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
-x = generate_x(500)#00) 
-y = generate_y(500)#00) 
+x = generate_x(50000) 
+y = generate_y(50000) 
 
 if d==1:
     np.random.seed(0)
@@ -135,7 +186,7 @@ if d==1:
 
 else:
     np.random.seed(0)
-    truth = distances.sw(x, y, r=r, N=100, nq=10000, delta=delta) 
+    truth = distances.sw(x, y, r=r, N=10000, nq=10000, delta=delta) 
 
 print("Truth: ", truth, "\n")
 
@@ -162,7 +213,7 @@ for i in range(n_num):
             proc_chunks.append(( (j*Del, (j+1)*Del ) ))
 
     with mp.Pool(processes=n_proc) as pool:
-        proc_results = [pool.apply_async(process_chunk, args=(chunk, ns[i], truth))
+        proc_results = [pool.apply_async(process_chunk, args=(chunk, i, truth))
                         for chunk in proc_chunks]
         result_chunks = [r.get() for r in proc_results]
 
