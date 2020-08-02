@@ -8,11 +8,8 @@ def generate_x_model1(n):
     for i in range(n):
         u = np.random.uniform(size=1)
 
-        if u < 1.0/3:
+        if u < 0.5:
             x[i,:] = np.random.multivariate_normal(mean=[-1, -1], cov=np.identity(d), size=1)
-
-        elif u < 2.0/3:
-            x[i,:] = np.random.multivariate_normal(mean=[0, 0], cov=np.identity(d), size=1)
 
         else:
             x[i,:] = np.random.multivariate_normal(mean=[1,1], cov=np.identity(d), size=1)
@@ -101,7 +98,7 @@ def generate_y_model4(n):
         u = np.random.uniform(0, 1, 1)
 
         if u < 0.05:
-            y[i] = np.random.normal(5, 1, size=1)
+            y[i] = np.random.normal(20, 1, size=1)
 
         else:
             y[i] = np.random.normal(0, 1, size=1)
