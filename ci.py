@@ -324,21 +324,14 @@ def pretest(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", N=500, B=500, nq=1000,
     m = y.shape[0]
 
     if x.ndim == 1:
-        C_exact = exact_1d(x, y, r=r, delta=delta, alpha=alpha, mode=mode, nq=nq)
+        C_exact = exact_1d(x, y, r=r, delta=delta, alpha=alpha/2.0, mode=mode, nq=nq)
         arr_x = np.array(x).reshape([-1,1])
         arr_y = np.array(y).reshape([-1,1])
 
     else:
-        C_exact = mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=theta)
+        C_exact = mc_sw(x, y, r=r, delta=delta, alpha=alpha/2.0, N=N, nq=nq, theta=theta)
         arr_x = x
         arr_y = y
-
-    unique_x = np.unique(arr_x, axis=0, return_counts=True)[1]
-    unique_y = np.unique(arr_y, axis=0, return_counts=True)[1]
-
-    if np.any(unique_x != 1) or np.any(unique_y != 1):
-        print("not unique")
-        return C_exact
 
     if C_exact[0] == 0:
         print("null")
@@ -346,9 +339,9 @@ def pretest(x, y, r=2, delta=0.1, alpha=0.05, mode="DKW", N=500, B=500, nq=1000,
 
     print("boot")
     if x.ndim == 1:
-        return bootstrap_1d(x, y, r=r, delta=delta, alpha=alpha, B=B, nq=nq)
+        return bootstrap_1d(x, y, r=r, delta=delta, alpha=alpha/2.0, B=B, nq=nq)
     
-    return bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=theta)
+    return bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha/2.0, B=B, N=N, nq=nq, theta=theta)
 
 
 #for i in range(15):

@@ -97,29 +97,7 @@ def process_chunk(ran, ni, truth):
                 C = ci.exact_1d(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", nq=nq)
 
             elif method == "pretest":
-                #C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", B=B, nq=nq)
-
-                C_exact = ci.exact_1d(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", nq=nq)
-                arr_x = np.array(x).reshape([-1,1])
-                arr_y = np.array(y).reshape([-1,1])
-            
-                unique_x = np.unique(arr_x, axis=0, return_counts=True)[1]
-                unique_y = np.unique(arr_y, axis=0, return_counts=True)[1]
-            
-                if np.any(unique_x != 1) or np.any(unique_y != 1):
-                    print("not unique")
-                    C = C_exact
-            
-                elif C_exact[0] == 0:
-                    print("null")
-                    C = C_exact
-            
-                else:
-                    coverage[rep-low] = boot_coverage[rep, ni]
-                    lengths [rep-low] = boot_length  [rep, ni]
-                    elapsed [rep-low] = boot_elapsed [rep, ni]
-
-                    continue	
+                C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, mode="DKW", B=B, nq=nq)
 
             elif method == "boot":
                 C = ci.bootstrap_1d(x, y, r=r, delta=delta, alpha=alpha, B=B, nq=nq)
@@ -132,26 +110,7 @@ def process_chunk(ran, ni, truth):
                 C = ci.mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=None)
 
             elif method == "pretest":
-                C_exact = ci.mc_sw(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=None)
-            
-                unique_x = np.unique(x, axis=0, return_counts=True)[1]
-                unique_y = np.unique(y, axis=0, return_counts=True)[1]
-            
-                if np.any(unique_x != 1) or np.any(unique_y != 1):
-                    print("not unique")
-                    C = C_exact
-            
-                elif C_exact[0] == 0:
-                    print("null")
-                    C = C_exact
-            
-                else:
-#                    print("bootstrap: ",  boot_coverage[rep-low, ni])
-                    coverage[rep-low] = boot_coverage[rep, ni]
-                    lengths [rep-low] = boot_length [rep, ni]
-                    elapsed [rep-low] = boot_elapsed [rep, ni]
-
-                    continue	
+                C = ci.pretest(x, y, r=r, delta=delta, alpha=alpha, N=N, nq=nq, theta=None)
 
             elif method == "boot":
                 C = ci.bootstrap_sw(x, y, r=r, delta=delta, alpha=alpha, B=B, N=N, nq=nq, theta=None)
