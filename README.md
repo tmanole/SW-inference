@@ -1,7 +1,7 @@
 # SW-inference
 Code repository for reproducing the numerical studies in the paper 
 
-Manole, T., Balakrishnan, S., Wasserman, L. (2020). Minimax Confidence Intervals for the Sliced Wasserstein Distance. [[arXiv Preprint](https://arxiv.org/abs/1909.07862)]
+Manole, T., Balakrishnan, S., Wasserman, L. (2022). [Minimax Confidence Intervals for the Sliced Wasserstein Distance](https://arxiv.org/abs/1909.07862). _Electronic Journal of Statistics 16(1), 2252-2345._
 
 
 ## Dependencies 
